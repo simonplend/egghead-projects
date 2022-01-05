@@ -2,6 +2,7 @@ import { supabase } from "../utils/supabase";
 import Link from "next/link";
 
 export default function Home({ lessons }) {
+	console.log(supabase.auth.user());
 	console.log({ lessons });
 
 	return (
