@@ -1,12 +1,14 @@
 import '../styles/globals.css'
 import UserProvider from "../context/user";
+import Nav from "../components/nav";
 
 function MyApp({ Component, pageProps }) {
   return (
     <UserProvider>
+      <Nav />
       <Component {...pageProps} />
-      </UserProvider>
+    </UserProvider>
   );
 }
 
-export default MyApp
+export default MyApp;
