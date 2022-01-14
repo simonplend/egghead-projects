@@ -13,7 +13,11 @@ const handler = async (req, res) => {
 	let event;
 
 	try {
-		event = stripe.webhooks.constructEvent(reqBuffer, signature, signingSecret);
+		event = stripe.webhooks.constructEvent(
+			reqBuffer,
+			signature,
+			signingSecret
+		);
 	} catch (error) {
 		console.log(error);
 		return res.status(400).send(`Webhook error: ${error.message}`);
@@ -22,12 +26,22 @@ const handler = async (req, res) => {
 	const supabase = getServiceSupabase();
 
 	switch (event.type) {
-		case "customer.subscription.created":
+		// This event type is also fired when a subscription is created
+		case "customer.subscription.updated":
 			await supabase
 				.from("profile")
 				.update({
 					is_subscribed: true,
 					interval: event.data.object.items.data[0].plan.interval,
+				})
+				.eq("stripe_customer", event.data.object.customer);
+			break;
+		case "customer.subscription.deleted":
+			await supabase
+				.from("profile")
+				.update({
+					is_subscribed: false,
+					interval: null,
 				})
 				.eq("stripe_customer", event.data.object.customer);
 			break;

@@ -23,7 +23,7 @@ const Provider = ({ children }) => {
 
 				setUser({
 					...sessionUser,
-					...profile
+					...profile,
 				});
 
 				setIsLoading(false);
@@ -39,10 +39,25 @@ const Provider = ({ children }) => {
 
 	useEffect(() => {
 		axios.post("/api/set-supabase-cookie", {
-			event: user ? 'SIGNED_IN' : 'SIGNED_OUT',
+			event: user ? "SIGNED_IN" : "SIGNED_OUT",
 			session: supabase.auth.session(),
-		})
+		});
 	}, []);
+
+	useEffect(() => {
+		if (user) {
+			const subscription = supabase
+				.from(`profile:id=eq.${user.id}`)
+				.on("UPDATE", (payload) => {
+					setUser({ ...user, ...payload.new });
+				})
+				.subscribe();
+
+			return () => {
+				supabase.removeSubscription(subscription);
+			};
+		}
+	}, [user]);
 
 	const login = async () => {
 		await supabase.auth.signIn({
